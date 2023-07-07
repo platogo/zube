@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -129,13 +128,16 @@ func NewClientWithId(clientId string) *Client {
 // Fetch the access token JWT from Zube API and set it for the client. If it already exists, refresh it.
 func (client *Client) RefreshAccessToken(key *rsa.PrivateKey) (string, error) {
 	refreshJWT, err := GenerateRefreshJWT(client.ClientId, key)
+	if err != nil {
+		return "", err
+	}
 
-	req, _ := zubeAccessTokenRequest(http.MethodPost, ApiUrl+"users/tokens", nil, client.ClientId, refreshJWT)
+	req, _ := zubeAccessTokenRequest(ApiUrl+"users/tokens", nil, client.ClientId, refreshJWT)
 	rsp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return "", err
 	}
-	body, err := ioutil.ReadAll(rsp.Body)
+	body, err := io.ReadAll(rsp.Body)
 	data := models.ZubeAccessToken{}
 	json.Unmarshal(body, &data)
 	client.AccessToken = string(data.AccessToken)
@@ -146,7 +148,7 @@ func (client *Client) FetchCurrentPerson() models.CurrentPerson {
 	currentPerson := models.CurrentPerson{}
 	url := zubeURL("/api/current_person", Query{})
 
-	body, err := client.performAPIRequestURLNoBody(http.MethodGet, &url)
+	body, err := client.doAPIRequestURLNoBody(http.MethodGet, &url)
 
 	Check(err, "failed to fetch current person info!")
 
@@ -161,7 +163,7 @@ func (client *Client) FetchCards(query *Query) []models.Card {
 	url := zubeURL("/api/cards", *query)
 
 	// TODO: Support pagination
-	body, err := client.performAPIRequestURLNoBody(http.MethodGet, &url)
+	body, err := client.doAPIRequestURLNoBody(http.MethodGet, &url)
 
 	Check(err, "failed to fetch cards!")
 
@@ -174,7 +176,7 @@ func (client *Client) FetchCardComments(cardId int) []models.Comment {
 
 	url := zubeURL("/api/cards/"+fmt.Sprint(cardId)+"/comments", Query{})
 
-	body, err := client.performAPIRequestURLNoBody(http.MethodGet, &url)
+	body, err := client.doAPIRequestURLNoBody(http.MethodGet, &url)
 
 	Check(err, fmt.Sprintf("failed to fetch comments for card with Id: %d", cardId))
 
@@ -186,7 +188,7 @@ func (client *Client) CreateCard(card *models.Card) models.Card {
 	var respCard models.Card
 	url := zubeURL("/api/cards", Query{})
 	data, _ := json.Marshal(card)
-	resp, err := client.performAPIRequestURL(http.MethodPost, &url, bytes.NewBuffer(data))
+	resp, err := client.doAPIRequestURL(http.MethodPost, &url, bytes.NewBuffer(data))
 
 	Check(err, "failed to create card!")
 
@@ -200,7 +202,7 @@ func (client *Client) SearchCards(query *Query) []models.Card {
 	var response models.PaginatedResponse[models.Card]
 
 	url := zubeURL("/api/cards", *query)
-	body, err := client.performAPIRequestURLNoBody(http.MethodGet, &url)
+	body, err := client.doAPIRequestURLNoBody(http.MethodGet, &url)
 
 	Check(err, fmt.Sprintf("failed to find card with text: %s", query.Search))
 
@@ -212,7 +214,7 @@ func (client *Client) FetchWorkspaces(query *Query) []models.Workspace {
 	var response models.PaginatedResponse[models.Workspace]
 
 	url := zubeURL("/api/workspaces", *query)
-	body, err := client.performAPIRequestURLNoBody(http.MethodGet, &url)
+	body, err := client.doAPIRequestURLNoBody(http.MethodGet, &url)
 
 	Check(err, "failed to fetch workspaces!")
 
@@ -225,7 +227,7 @@ func (client *Client) FetchEpics(projectId int) []models.Epic {
 	var response models.PaginatedResponse[models.Epic]
 
 	url := zubeURL(fmt.Sprintf("/api/projects/%d/epics", projectId), Query{})
-	body, err := client.performAPIRequestURLNoBody(http.MethodGet, &url)
+	body, err := client.doAPIRequestURLNoBody(http.MethodGet, &url)
 
 	Check(err, fmt.Sprintf("failed to fetch card for project with Id: %d", projectId))
 
@@ -239,7 +241,7 @@ func (client *Client) FetchAccounts(query *Query) []models.Account {
 
 	url := zubeURL("/api/accounts", *query)
 
-	body, err := client.performAPIRequestURLNoBody(http.MethodGet, &url)
+	body, err := client.doAPIRequestURLNoBody(http.MethodGet, &url)
 
 	Check(err, "failed to fetch accounts")
 
@@ -253,7 +255,7 @@ func (client *Client) FetchSources() []models.Source {
 
 	url := zubeURL("/api/sources", Query{})
 
-	body, err := client.performAPIRequestURLNoBody(http.MethodGet, &url)
+	body, err := client.doAPIRequestURLNoBody(http.MethodGet, &url)
 
 	Check(err, "failed to fetch sources")
 
@@ -266,7 +268,7 @@ func (client *Client) FetchProjects(query *Query) []models.Project {
 
 	url := zubeURL("/api/projects", *query)
 
-	body, err := client.performAPIRequestURLNoBody(http.MethodGet, &url)
+	body, err := client.doAPIRequestURLNoBody(http.MethodGet, &url)
 
 	Check(err, "failed to fetch projects")
 
@@ -280,7 +282,7 @@ func (client *Client) FetchProjectCards(projectId int, query *Query) []models.Ca
 
 	url := zubeURL(fmt.Sprintf("/api/projects/%d/cards", projectId), *query)
 
-	body, err := client.performAPIRequestURLNoBody(http.MethodGet, &url)
+	body, err := client.doAPIRequestURLNoBody(http.MethodGet, &url)
 
 	Check(err, fmt.Sprintf("failed to fetch cards for project with Id: %d", projectId))
 
@@ -293,7 +295,7 @@ func (client *Client) FetchProjectMembers(projectId int) []models.Member {
 
 	url := zubeURL(fmt.Sprintf("/api/projects/%d/members", projectId), Query{})
 
-	body, err := client.performAPIRequestURLNoBody(http.MethodGet, &url)
+	body, err := client.doAPIRequestURLNoBody(http.MethodGet, &url)
 
 	Check(err, fmt.Sprintf("failed to fetch project members for project with Id: %d", projectId))
 
@@ -307,7 +309,7 @@ func (client *Client) FetchLabels(projectId int) []models.Label {
 
 	url := zubeURL(fmt.Sprintf("/api/projects/%d/labels", projectId), Query{})
 
-	body, err := client.performAPIRequestURLNoBody(http.MethodGet, &url)
+	body, err := client.doAPIRequestURLNoBody(http.MethodGet, &url)
 
 	Check(err, fmt.Sprintf("failed to fetch labels for project with Id: %d", projectId))
 
@@ -320,7 +322,7 @@ func (client *Client) FetchSprints(workspaceId int) []models.Sprint {
 	var response models.PaginatedResponse[models.Sprint]
 
 	url := zubeURL(fmt.Sprintf("/api/workspaces/%d/sprints", workspaceId), Query{})
-	body, err := client.performAPIRequestURLNoBody(http.MethodGet, &url)
+	body, err := client.doAPIRequestURLNoBody(http.MethodGet, &url)
 
 	Check(err, fmt.Sprintf("failed to fetch sprints for workspace with ID: %d", workspaceId))
 
@@ -329,12 +331,12 @@ func (client *Client) FetchSprints(workspaceId int) []models.Sprint {
 }
 
 // Wrapper around `performAPIRequestURL` for e.g. GET requests with no request body
-func (client *Client) performAPIRequestURLNoBody(method string, url *url.URL) ([]byte, error) {
-	return client.performAPIRequestURL(method, url, nil)
+func (client *Client) doAPIRequestURLNoBody(method string, url *url.URL) ([]byte, error) {
+	return client.doAPIRequestURL(method, url, nil)
 }
 
 // Performs a generic request with URL and body
-func (client *Client) performAPIRequestURL(method string, url *url.URL, body io.Reader) ([]byte, error) {
+func (client *Client) doAPIRequestURL(method string, url *url.URL, body io.Reader) ([]byte, error) {
 	req, _ := http.NewRequest(method, url.String(), body)
 
 	if client.AccessToken == "" {
@@ -352,7 +354,7 @@ func (client *Client) performAPIRequestURL(method string, url *url.URL, body io.
 	req.Header.Add("Authorization", "Bearer "+client.AccessToken)
 	req.Header.Add("X-Client-ID", client.ClientId)
 	req.Header.Add("User-Agent", UserAgent)
-	if body != nil && (method == http.MethodPost || method == http.MethodPut || method == http.MethodPatch) {
+	if body != nil {
 		req.Header.Add("Accept", "application/json")
 		req.Header.Add("Content-Type", "application/json")
 	}
@@ -364,7 +366,7 @@ func (client *Client) performAPIRequestURL(method string, url *url.URL, body io.
 		return json.Marshal(cached.Data)
 	}
 
-	respBody, err := ioutil.ReadAll(resp.Body)
+	respBody, err := io.ReadAll(resp.Body)
 	defer resp.Body.Close()
 
 	if etag := resp.Header.Get("ETag"); etag != "" {
@@ -375,8 +377,8 @@ func (client *Client) performAPIRequestURL(method string, url *url.URL, body io.
 }
 
 // Only used to create a request to fetch an access token JWT using a refresh JWT
-func zubeAccessTokenRequest(method, url string, body io.Reader, clientId, refreshJWT string) (*http.Request, error) {
-	req, err := http.NewRequest(method, url, nil)
+func zubeAccessTokenRequest(url string, body io.Reader, clientId, refreshJWT string) (*http.Request, error) {
+	req, err := http.NewRequest(http.MethodPost, url, nil)
 	if err != nil {
 		return nil, err
 	}
