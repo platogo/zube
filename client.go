@@ -16,7 +16,6 @@ import (
 
 	"github.com/platogo/cache"
 	"github.com/platogo/zube/models"
-	"github.com/spf13/viper"
 )
 
 const (
@@ -91,10 +90,10 @@ type Client struct {
 
 // Creates and returns a Zube Client with an access token
 // If the current access token is invalid, it is refreshes and saved to config
-func NewClient() (*Client, error) {
+func NewClient(clientId, accessToken string) (*Client, error) {
 	client := &Client{
-		ClientId:        viper.GetString("client_id"),
-		ZubeAccessToken: models.ZubeAccessToken{AccessToken: viper.GetString("access_token")},
+		ClientId:        clientId,
+		ZubeAccessToken: models.ZubeAccessToken{AccessToken: accessToken},
 		HTTPc:           http.Client{Timeout: time.Duration(10) * time.Second},
 	}
 
@@ -112,8 +111,6 @@ func NewClient() (*Client, error) {
 			return client, err
 		}
 
-		viper.Set("access_token", access_token)
-		viper.WriteConfig()
 		client.ZubeAccessToken.AccessToken = access_token
 	}
 

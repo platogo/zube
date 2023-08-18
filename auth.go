@@ -3,7 +3,6 @@ package zube
 import (
 	"crypto/rsa"
 	"encoding/json"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -22,7 +21,12 @@ func PrivateKeyFilePath() string {
 }
 
 func GetPrivateKey() (*rsa.PrivateKey, error) {
-	privateKeyFile, err := ioutil.ReadFile(PrivateKeyFilePath())
+	return GetPrivateKeyWithPath(PrivateKeyFilePath())
+}
+
+// Returns the parsed RSA private key from the given path to a .pem file
+func GetPrivateKeyWithPath(privateKeyPath string) (*rsa.PrivateKey, error) {
+	privateKeyFile, err := os.ReadFile(privateKeyPath)
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +42,7 @@ func GetPrivateKey() (*rsa.PrivateKey, error) {
 
 // Create a refresh JWT valid for one minute, used to fetch an access token JWT
 func GenerateRefreshJWT(clientId string, key *rsa.PrivateKey) (string, error) {
-	now := time.Now()
+	now := time.Now() // TODO: Stop using StandardClaims
 	claims := &jwt.StandardClaims{
 		IssuedAt:  now.Unix(),
 		ExpiresAt: (now.Add(time.Minute)).Unix(),
