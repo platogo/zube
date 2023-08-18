@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -21,7 +20,7 @@ import (
 const (
 	ZubeHost  string = "zube.io"
 	ApiUrl    string = "https://zube.io/api/"
-	UserAgent string = "Zube-CLI"
+	UserAgent string = "Zube-Go"
 )
 
 // Request parameter struct definitions
@@ -99,19 +98,10 @@ func NewClient(clientId, accessToken string) (*Client, error) {
 
 	if !IsTokenValid(client.ZubeAccessToken) {
 		privateKey, err := GetPrivateKey()
+		Check(err, "failed to get private key")
 
-		if err != nil {
-			log.Fatalln(err)
-			return client, err
-		}
-		access_token, err := client.RefreshAccessToken(privateKey)
-
-		if err != nil {
-			log.Fatalln(err)
-			return client, err
-		}
-
-		client.ZubeAccessToken.AccessToken = access_token
+		_, err = client.RefreshAccessToken(privateKey)
+		Check(err, "failed to refresh access token")
 	}
 
 	return client, nil
@@ -123,22 +113,22 @@ func NewClientWithId(clientId string) *Client {
 }
 
 // Fetch the access token JWT from Zube API and set it for the client. If it already exists, refresh it.
-func (client *Client) RefreshAccessToken(key *rsa.PrivateKey) (string, error) {
+func (client *Client) RefreshAccessToken(key *rsa.PrivateKey) (*Client, error) {
 	refreshJWT, err := GenerateRefreshJWT(client.ClientId, key)
 	if err != nil {
-		return "", err
+		return client, err
 	}
 
 	req, _ := zubeAccessTokenRequest(ApiUrl+"users/tokens", nil, client.ClientId, refreshJWT)
 	rsp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return "", err
+		return client, err
 	}
 	body, err := io.ReadAll(rsp.Body)
 	data := models.ZubeAccessToken{}
 	json.Unmarshal(body, &data)
 	client.AccessToken = string(data.AccessToken)
-	return client.AccessToken, err
+	return client, err
 }
 
 func (client *Client) FetchCurrentPerson() models.CurrentPerson {
