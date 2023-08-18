@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"github.com/platogo/cache"
-	"github.com/platogo/zube/models"
+	"github.com/platogo/zube/v2/models"
 )
 
 const (

@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/platogo/zube/models"
+	"github.com/platogo/zube/v2/models"
 )
 
 const PrivateKeyFileName = "zube_api_key.pem"

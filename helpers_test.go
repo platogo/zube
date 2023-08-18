@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/platogo/zube/models"
+	"github.com/platogo/zube/v2/models"
 )
 
 func TestGetMembersByNames(t *testing.T) {

@@ -1,6 +1,6 @@
 package main
 
-import "github.com/platogo/zube"
+import "github.com/platogo/zube/v2"
 
 func main() {
 	clientId := "b228eedc-a138-11ec-97ca-53e3bea7ba63"

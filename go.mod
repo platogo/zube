@@ -1,4 +1,4 @@
-module github.com/platogo/zube
+module github.com/platogo/zube/v2
 
 go 1.20
 
