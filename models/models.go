@@ -213,6 +213,13 @@ type Card struct {
 	LabelIds    []int       `json:"label_ids"`
 }
 
+type Destination struct {
+	Position    int    `json:"position"` // Required
+	Type        string `json:"type"`     // Required, only accepts `category` or `project`
+	Name        int    `json:"name"`
+	WorkspaceId int    `json:"workspace_id"` // Required if sending `Type` as `category`
+}
+
 type Comment struct {
 	Id        int    `json:"id"`
 	CardId    int    `json:"card_id"`
