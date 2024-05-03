@@ -42,10 +42,10 @@ func GetPrivateKeyWithPath(privateKeyPath string) (*rsa.PrivateKey, error) {
 
 // Create a refresh JWT valid for one minute, used to fetch an access token JWT
 func GenerateRefreshJWT(clientId string, key *rsa.PrivateKey) (string, error) {
-	now := time.Now() // TODO: Stop using StandardClaims
-	claims := &jwt.StandardClaims{
-		IssuedAt:  now.Unix(),
-		ExpiresAt: (now.Add(time.Minute)).Unix(),
+	now := time.Now()
+	claims := &jwt.RegisteredClaims{
+		IssuedAt:  jwt.NewNumericDate(now),
+		ExpiresAt: jwt.NewNumericDate((now.Add(time.Minute))),
 		Issuer:    clientId,
 	}
 	if err := claims.Valid(); err != nil {
