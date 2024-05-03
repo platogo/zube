@@ -6,8 +6,8 @@ github.com/golang-jwt/jwt/v4 v4.4.2/go.mod h1:m21LjoU+eqJr34lmDMbreY2eSTRJ1cv77w
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
-github.com/markphelps/optional v0.10.0 h1:vTaMRRTuN7aPY5X8g6K82W23qR4VMqBNyniC5BIJlqo=
-github.com/markphelps/optional v0.10.0/go.mod h1:Fvjs1vxcm7/wDqJPFGEiEM1RuxFl9GCyxQlj9M9YMAQ=
+github.com/markphelps/optional v0.11.0 h1:NiN3aRmUzs+nfdSaFQ646PmlbhVHr11mZU2DQMbWDfQ=
+github.com/markphelps/optional v0.11.0/go.mod h1:Fvjs1vxcm7/wDqJPFGEiEM1RuxFl9GCyxQlj9M9YMAQ=
 github.com/platogo/cache v1.0.0 h1:tbE06uUKEE11KbfMxXFFImfC6rDzt2Qspx9A9c2+GAQ=
 github.com/platogo/cache v1.0.0/go.mod h1:aaIYSY3T9V8eZ4H2CYm17O3bXpEQ8lgxwWZM1302hQI=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
