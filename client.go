@@ -119,7 +119,7 @@ func (client *Client) RefreshAccessToken(key *rsa.PrivateKey) (*Client, error) {
 		return client, err
 	}
 
-	req, _ := zubeAccessTokenRequest(ApiUrl+"users/tokens", nil, client.ClientId, refreshJWT)
+	req, _ := zubeAccessTokenRequest(ApiUrl+"users/tokens", client.ClientId, refreshJWT)
 	rsp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return client, err
@@ -367,7 +367,7 @@ func (client *Client) DoApiRequestUrl(method string, url *url.URL, body io.Reade
 }
 
 // Only used to create a request to fetch an access token JWT using a refresh JWT
-func zubeAccessTokenRequest(url string, body io.Reader, clientId, refreshJWT string) (*http.Request, error) {
+func zubeAccessTokenRequest(url string, clientId, refreshJWT string) (*http.Request, error) {
 	req, err := http.NewRequest(http.MethodPost, url, nil)
 	if err != nil {
 		return nil, err
